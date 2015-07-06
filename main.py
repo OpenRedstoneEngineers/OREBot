@@ -185,12 +185,12 @@ class IRCClient:
                     else:
                         target2=cmdargs[1]
                         self.say("Welcome to ORE, %s! In order to get started, you can teleport to the welcome signs using /welcome" % target2,target2)
-                                                self.say("If you would like to apply for a server, please visit https://openredstone.org/apply/",target2)
-                                                self.say("Please read the signs before proceeding to ask questions",target2)
+                        self.say("If you would like to apply for a server, please visit https://openredstone.org/apply/",target2)
+                        self.say("Please read the signs before proceeding to ask questions",target2)
                         for c in self.services:
                             self.say(".msg %s Welcome to ORE, %s! In order to get started, you can teleport to the welcome signs using /welcome" % (target2,target2),c)
-                                                    self.say(".msg %s If you would like to apply for a server, please visit https://openredstone.org/apply/" % (target2),c)
-                                                    self.say(".msg %s Please read the signs before proceeding to ask questions" % (target2),c)
+                            self.say(".msg %s If you would like to apply for a server, please visit https://openredstone.org/apply/" % (target2),c)
+                            self.say(".msg %s Please read the signs before proceeding to ask questions" % (target2),c)
                 elif self.ctx["type"] == "PRIVMSG" and (self.nickname.lower() in self.ctx["msg"].lower()):
                     # something is speaking to the bot
                     query = self.ctx["msg"].lower().replace(self.nickname.lower(), "".join((self.bcolors["UNDERLINE"], self.nickname.lower(), self.bcolors["ENDC"])))
