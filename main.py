@@ -12,7 +12,7 @@ class IRCClient:
     nickname = "OREBot"
     password = None
     ident_password = None
-    server = "irc.freenode.net"
+    server = "irc.openredstone.org"
     port = 6667
     channels = {"#openredstone":[]}
     services = ["OREBuild","ORESchool","ORESurvival"]
