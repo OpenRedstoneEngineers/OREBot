@@ -191,7 +191,6 @@ class IRCClient:
 							self.say(".msg %s Welcome to ORE, %s! In order to get started, you can teleport to the welcome signs using /welcome" % (target2,target2),c)
 	                                                self.say(".msg %s If you would like to apply for a server, please visit https://openredstone.org/apply/" % (target2),c)
         	                                        self.say(".msg %s Please read the signs before proceeding to ask questions" % (target2),c)
-				# directed to the bot?
 				elif self.ctx["type"] == "PRIVMSG" and (self.nickname.lower() in self.ctx["msg"].lower()):
 					# something is speaking to the bot
 					query = self.ctx["msg"].lower().replace(self.nickname.lower(), "".join((self.bcolors["UNDERLINE"], self.nickname.lower(), self.bcolors["ENDC"])))
