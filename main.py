@@ -2,18 +2,21 @@
 import socket
 import time
 import keyword
+import json
+import os
 
 class IRCClient:
 	socket = None
 	connected = False
+
 	nickname = "OREBot"
-	channels = {"#openredstone":[]}
-	server = "irc.openredstone.org"
+	password = None
+	ident_password = None
+	server = "irc.freenode.net"
 	port = 6667
+	channels = {"#openredstone":[]}
+	services = ["OREBuild","ORESchool","ORESurvival"]
 	cmd = "!"
-	password = "fancygroupednicknamemanifolds"
-	email = "omar_saad12@hotmail.com"
-	clientservers = ["OREBuild","ORESchool","ORESurvival"]
 
 	def __init__(self):
 		self.ctx = {}
@@ -38,6 +41,7 @@ class IRCClient:
 			"UNDERLINE" : "\033[4m"
 		}
 
+	def start(self):
 		self.socket = socket.socket()
 		self.socket.connect((self.server, self.port))
 		self.send("NICK %s" % self.nickname)
@@ -74,7 +78,7 @@ class IRCClient:
 								if n.find("@") != -1:
 									n=n[1:]
 								self.channels[c].append(n)
-						print (c, ": ", self.channels[c]) 
+						print (c, ": ", self.channels[c])
 					continue
 				if args[1]=="JOIN" and self.channels[args[2]]!=[]:
 					self.channels[args[2]].append(args[0][1:].split("!",1)[0])
@@ -118,7 +122,7 @@ class IRCClient:
 
 				# Channel moderation
 				# Spam kicking
-				if self.oldctx["sender"]==self.ctx["sender"] and self.oldctx["msg"]==self.ctx["msg"] and not any(x==self.ctx["sendername"] for x in self.clientservers):
+				if self.oldctx["sender"]==self.ctx["sender"] and self.oldctx["msg"]==self.ctx["msg"] and not any(x==self.ctx["sendername"] for x in self.services):
 					self.s+=1
 					if self.s==1:
 						self.say("WARNING: spam detected from user %s. stop or you will be kicked" % self.ctx["sendername"], self.ctx["sendername"])
@@ -140,9 +144,9 @@ class IRCClient:
 
 				# whom to reply?
 				target = self.ctx["sendername"]
-				if (self.ctx["msg"].find(":")==-1 and any(x==target for x in self.clientservers)) or (self.ctx["msg"].find(":")==len(self.ctx["msg"])-1):
+				if (self.ctx["msg"].find(":")==-1 and any(x==target for x in self.services)) or (self.ctx["msg"].find(":")==len(self.ctx["msg"])-1):
 					continue
-				elif any(x==target for x in self.clientservers):
+				elif any(x==target for x in self.services):
 					fullcmd=self.ctx["msg"].split(": ",1)[1]
 				else:
 					fullcmd=self.ctx["msg"]
@@ -183,11 +187,10 @@ class IRCClient:
 						self.say("Welcome to ORE, %s! In order to get started, you can teleport to the welcome signs using /welcome" % target2,target2)
                                                 self.say("If you would like to apply for a server, please visit https://openredstone.org/apply/",target2)
                                                 self.say("Please read the signs before proceeding to ask questions",target2)
-						for c in self.clientservers:
+						for c in self.services:
 							self.say(".msg %s Welcome to ORE, %s! In order to get started, you can teleport to the welcome signs using /welcome" % (target2,target2),c)
 	                                                self.say(".msg %s If you would like to apply for a server, please visit https://openredstone.org/apply/" % (target2),c)
         	                                        self.say(".msg %s Please read the signs before proceeding to ask questions" % (target2),c)
-				# directed to the bot?
 				elif self.ctx["type"] == "PRIVMSG" and (self.nickname.lower() in self.ctx["msg"].lower()):
 					# something is speaking to the bot
 					query = self.ctx["msg"].lower().replace(self.nickname.lower(), "".join((self.bcolors["UNDERLINE"], self.nickname.lower(), self.bcolors["ENDC"])))
@@ -209,21 +212,23 @@ class IRCClient:
 		self.socket.send("".join((msg,"\r\n")).encode("latin1"))
 
 	def getname(self):
-		if any(x == self.ctx["sender"].split("!",1)[0] for x in self.clientservers):
+		if any(x == self.ctx["sender"].split("!",1)[0] for x in self.services):
 			name=self.ctx["msg"].split(":",1)[0]
 		else:
 			name=self.ctx["sendername"]
 		return name
 
 	def say(self, msg, to):
-		if any(x == to for x in self.clientservers):
+		if any(x == to for x in self.services):
 			self.send("PRIVMSG %s :%s" % (to, ".msg %s %s" % (self.getname(), msg)))
 		else:
 			self.send("PRIVMSG %s :%s" % (to, msg))
 
 	def perform(self):
-		#self.send("PRIVMSG nickserv : register %s %s" % (self.password, self.email))
-		self.send("PRIVMSG nickserv : identify %s" % self.password)
+		if self.password is not None:
+			self.send("PASS %s" % self.password)
+		if self.ident_password is not None:
+			self.send("PRIVMSG nickserv : identify %s" % self.ident_password)
 		for c in self.channels:
 			self.send("JOIN %s" % c)
 
@@ -244,10 +249,29 @@ class IRCClient:
 		for word in dir():
 			if word in expr:
 				return None
-		
 		try:
 			return eval(expr)
 		except Exception as e:
 			return e
 
-IRCClient()
+config = {}
+if os.path.isfile("./config.json"):
+	with open("./config.json", "r") as f:
+		config = json.load(f)
+else:
+	with open("./config.default.json", "r") as f:
+		config = json.load(f)
+
+client = IRCClient()
+client.nickname = config["nickname"]
+client.password = config["password"]
+client.ident_password = config["ident_password"]
+client.server = config["server"]
+client.port = config["port"]
+client.channels = {}
+for chan in config["channels"]:
+	client.channels[chan] = []
+client.services = config["services"]
+client.cmd = config["cmd"]
+
+client.start()
