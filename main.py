@@ -162,7 +162,6 @@ class IRCClient:
                 elif fullcmd == "".join((self.cmd, "help calc")):
                     self.say("syntax: !calc <expression>",target)
                     self.say("calculate an expression provided after the command",target)
-                    self.say("currently unavailable",target)
 
                 # help command for welcome
                 elif fullcmd[0:len(self.cmd)+12] == "".join((self.cmd,"help welcome")):
