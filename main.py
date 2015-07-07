@@ -235,7 +235,7 @@ class IRCClient:
         try:
             float(s)
             return True
-        except TypeError:
+        except ValueError:
             return False
 
     def calcexpression(self, expr):
