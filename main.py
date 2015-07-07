@@ -77,25 +77,25 @@ class IRCClient:
                             for n in args1[5][1:].split():
                                 if n.find("@") != -1:
                                     n=n[1:]
-                                self.channels[c].append(n)
+                                self.channels[c].append(n.lower())
                         print (c, ": ", self.channels[c])
                     continue
-                if args[1]=="JOIN" and self.channels[args[2].split(":")[-1]]!=[]:
-                    self.channels[args[2].split(":")[-1]].append(args[0][1:].split("!",1)[0])
-                    print (args[2].split(":")[-1], self.channels[args[2].split(":")[-1]])
+                if args[1]=="JOIN" and self.channels[args[2].split(":")[-1].lower()]!=[]:
+                    self.channels[args[2].split(":")[-1].lower()].append(args[0][1:].split("!",1)[0].lower())
+                    print (args[2].split(":")[-1], self.channels[args[2].split(":")[-1].lower()])
                     continue
                 if args1[1]=="KICK":
-                    self.channels[args1[2]].remove(args1[3])
-                    print (args[2], self.channels[args[2]])
+                    self.channels[args1[2].lower()].remove(args1[3].lower())
+                    print (args[2], self.channels[args[2].lower()])
                     continue
                 if args[1]=="PART":
-                    self.channels[args[2].split(":")[-1]].remove(args[0][1:].split("!",1)[0])
-                    print (args[2].split(":")[-1], self.channels[args[2]])
+                    self.channels[args[2].split(":")[-1].lower()].remove(args[0][1:].split("!",1)[0].lower())
+                    print (args[2].split(":")[-1], self.channels[args[2].lower()])
                     continue
                 if args[1]=="QUIT":
                     for c in self.channels:
                         try:
-                            self.channels[c].remove(args[0].split("!")[0][1:])
+                            self.channels[c].remove(args[0].split("!")[0][1:].lower())
                             print (c, self.channels[c])
                         except (ValueError):
                             pass
@@ -105,7 +105,7 @@ class IRCClient:
                         i=0
                         for n in self.channels[c]:
                             if n==args[0][1:].split("!")[0]:
-                                self.channels[c][i]==args[2]
+                                self.channels[c][i]==args[2].lower()
                             i+=1
                         i=0
                     continue
@@ -269,7 +269,7 @@ client.server = config["server"]
 client.port = config["port"]
 client.channels = {}
 for chan in config["channels"]:
-    client.channels[chan] = []
+    client.channels[chan.lower()] = []
 client.services = config["services"]
 client.cmd = config["cmd"]
 
