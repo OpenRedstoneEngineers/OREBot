@@ -80,17 +80,17 @@ class IRCClient:
                                 self.channels[c].append(n)
                         print (c, ": ", self.channels[c])
                     continue
-                if args[1]=="JOIN" and self.channels[args[2].split(":")[1]]!=[]:
-                    self.channels[args[2].split(":")[1]].append(args[0][1:].split("!",1)[0])
-                    print (args[2].split(":")[1], self.channels[args[2].split(":")[1]])
+                if args[1]=="JOIN" and self.channels[args[2].split(":")[-1]]!=[]:
+                    self.channels[args[2].split(":")[-1]].append(args[0][1:].split("!",1)[0])
+                    print (args[2].split(":")[-1], self.channels[args[2].split(":")[-1]])
                     continue
                 if args1[1]=="KICK":
                     self.channels[args1[2]].remove(args1[3])
                     print (args[2], self.channels[args[2]])
                     continue
                 if args[1]=="PART":
-                    self.channels[args[2].split(":")[1]].remove(args[0][1:].split("!",1)[0])
-                    print (args[2].split(":")[1], self.channels[args[2]])
+                    self.channels[args[2].split(":")[-1]].remove(args[0][1:].split("!",1)[0])
+                    print (args[2].split(":")[-1], self.channels[args[2]])
                     continue
                 if args[1]=="QUIT":
                     for c in self.channels:
