@@ -48,7 +48,7 @@ class IRCClient:
         self.send("USER %(nick)s %(nick)s %(nick)s :%(nick)s" % {"nick":self.nickname})
         while True:
             i=0
-            buf = self.socket.recv(4096).decode("latin1")
+            buf = self.socket.recv(4096).decode("utf8")
             lines = buf.split("\n")
             for data in lines:
                 data = str(data).strip()
@@ -205,7 +205,7 @@ class IRCClient:
 
     def send(self, msg):
         print ("".join(("I> ",msg)))
-        self.socket.send("".join((msg,"\r\n")).encode("latin1"))
+        self.socket.send("".join((msg,"\r\n")).encode("utf8"))
 
     def getname(self):
         if any(x == self.ctx["sender"].split("!",1)[0] for x in self.services):
