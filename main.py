@@ -241,7 +241,7 @@ class IRCClient:
     def calcexpression(self, expr):
         c=0
         for i in expr:
-            if isnumber(i):
+            if self.isnumber(i):
                 c+=1
             else:
                 c=0
