@@ -243,16 +243,25 @@ class IRCClient:
             return False
 
     def calcexpression(self, expr):
+        c=0
         for kw in keyword.kwlist:
             if kw in expr:
                 return None
         for word in dir():
             if word in expr:
                 return None
-        try:
-            return eval(expr)
-        except Exception as e:
-            return e
+        for i in expr:
+            if isnumber(i):
+                c+=1
+            else:
+                c=0
+        if expr.find("**")!=-1 or c==7:
+            return None
+        else:
+            try:
+                return eval(expr)
+            except Exception as e:
+                return e
 
 config = {}
 if os.path.isfile("./config.json"):
