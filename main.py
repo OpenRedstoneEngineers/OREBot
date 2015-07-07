@@ -89,8 +89,8 @@ class IRCClient:
                     print (args[2], self.channels[args[2]])
                     continue
                 if args[1]=="PART":
-                    self.channels[args[2]].remove(args[0][1:].split("!",1)[0])
-                    print (args[2], self.channels[args[2]])
+                    self.channels[args[2].split(":")[1]].remove(args[0][1:].split("!",1)[0])
+                    print (args[2].split(":")[1], self.channels[args[2]])
                     continue
                 if args[1]=="QUIT":
                     for c in self.channels:
