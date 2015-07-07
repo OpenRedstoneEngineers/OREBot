@@ -81,7 +81,7 @@ class IRCClient:
                         print (c, ": ", self.channels[c])
                     continue
                 if args[1]=="JOIN" and self.channels[args[2].split(":")[1]]!=[]:
-                    self.channels[args[2]].append(args[0][1:].split("!",1)[0])
+                    self.channels[args[2].split(":")[1]].append(args[0][1:].split("!",1)[0])
                     print (args[2].split(":")[1], self.channels[args[2].split(":")[1]])
                     continue
                 if args1[1]=="KICK":
