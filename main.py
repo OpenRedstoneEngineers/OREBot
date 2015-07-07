@@ -78,19 +78,19 @@ class IRCClient:
                                 if n.find("@") != -1:
                                     n=n[1:]
                                 self.channels[c].append(n.lower())
-                        print (c, ": ", self.channels[c])
+                        print (c, " ", self.channels[c]) 
                     continue
-                if args[1]=="JOIN" and self.channels[args[2].split(":")[-1].lower()]!=[]:
-                    self.channels[args[2].split(":")[-1].lower()].append(args[0][1:].split("!",1)[0].lower())
-                    print (args[2].split(":")[-1], self.channels[args[2].split(":")[-1].lower()])
+                if args[1]=="JOIN" and self.channels[args[2][1:].lower()]!=[]:
+                    self.channels[args[2][1:].lower()].append(args[0][1:].split("!",1)[0].lower())
+                    print (args[2][1:].lower(), self.channels[args[2][1:].lower()])
                     continue
                 if args1[1]=="KICK":
                     self.channels[args1[2].lower()].remove(args1[3].lower())
-                    print (args[2], self.channels[args[2].lower()])
+                    print (args[2].lower(), self.channels[args[2].lower()])
                     continue
                 if args[1]=="PART":
-                    self.channels[args[2].split(":")[-1].lower()].remove(args[0][1:].split("!",1)[0].lower())
-                    print (args[2].split(":")[-1], self.channels[args[2].lower()])
+                    self.channels[args[2].lower()].remove(args[0][1:].split("!",1)[0].lower())
+                    print (args[2].lower(), self.channels[args[2].lower()])
                     continue
                 if args[1]=="QUIT":
                     for c in self.channels:
@@ -104,8 +104,9 @@ class IRCClient:
                     for c in self.channels:
                         i=0
                         for n in self.channels[c]:
-                            if n==args[0][1:].split("!")[0]:
-                                self.channels[c][i]==args[2].lower()
+                            if n==args[0][1:].split("!")[0].lower():
+                                self.channels[c][i]=args[2][1:].lower()
+                                print (c, self.channels[c])
                             i+=1
                         i=0
                     continue
