@@ -1,0 +1,3 @@
+OREBot
+======
+IRC utility bot
