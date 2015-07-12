@@ -5,7 +5,7 @@ import json
 import os
 import socket
 
-class IRCClient:
+class IRCClient(object):
     def __init__(
             self, nickname, password, ident_password, server, channels, \
             services, cmd):
