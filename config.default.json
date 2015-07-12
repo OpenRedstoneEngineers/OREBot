@@ -2,7 +2,7 @@
   "nickname": "OREBot",
   "password": null,
   "ident_password": null,
-  "server": "irc.freenode.net",
+  "hostname": "irc.freenode.net",
   "port": 6667,
   "channels": [
     "#openredstone"
