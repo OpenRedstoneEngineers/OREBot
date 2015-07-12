@@ -21,12 +21,10 @@ class IRCClient(object):
         self.ident_password = ident_password
         self.hostname = hostname
         self.port = port
-        # Dictionary is used later for channel membership tracking
-        self.channels = {}
-        for chan in channels:
-            self.channels[chan.lower()] = []
+        self.channels = channels
         self.services = services
         self.cmd = cmd
+
 
     def connect(self):
         print("Connecting to server at {}:{}".format(self.hostname, self.port))
@@ -44,7 +42,8 @@ class IRCClient(object):
         if self.ident_password:
             self._sendmsg("PRIVMSG NickServ :identify {}".format(
                 self.ident_password))
-        self._sendmsg("JOIN {}".format(",".join(self.channels.keys())))
+        self._sendmsg("JOIN {}".format(",".join(self.channels)))
+
 
     def disconnect(self):
         print ("Disconnecting from server")
@@ -55,6 +54,14 @@ class IRCClient(object):
         self._sock = None
         self._connected = False
 
+
+    def privmsg(self, target, msg):
+        print("[{} -> {}] {}".format(self.nickname, target, msg))
+        if isinstance(target, list):
+            target = ",".join(target)
+        self._sendmsg("PRIVMSG {} :{}".format(target, msg))
+
+
     def run(self):
         try:
             if not self._connected:
@@ -62,19 +69,72 @@ class IRCClient(object):
 
             while self._connected:
                 msg = self._recvmsg()
-                sender = msg[0]
-                command = msg[1]
-                args = msg[2]
-
-                if command == "PING":
-                    self._sendmsg("PONG :{}".format(args[0]))
+                self.handle(msg)
         finally:
             if self._connected:
                 self.disconnect()
 
+
+    def handle(self, msg):
+        original = msg[0]
+        sender = msg[1]
+        command = msg[2]
+        args = msg[3]
+
+        if command == "PING":
+            self._sendmsg("PONG :{}".format(args[0]))
+
+        elif command == "JOIN":
+            name = nameof(sender)
+            channel = args[0]
+            print("{} has joined {}".format(name, channel))
+
+        elif command == "PART":
+            name = self._nameof(sender)
+            channel = args[0]
+            print("{} has left {}".format(name, channel))
+
+        elif command == "KICK":
+            name = nameof(sender)
+            victim = args[0]
+            channel = args[1]
+            print("{} has kicked {} from {}".format(name, victim, channel))
+
+        elif command == "QUIT":
+            name = nameof(sender)
+            print("{} has quit IRC".format(name))
+
+        elif command == "KILL":
+            name = nameof(sender)
+            victim = args[0]
+            print("{} has killed {}".format(name, victim))
+
+        elif command == "NICK":
+            name = nameof(sender)
+            newname = args[0]
+            print("{} is now known as {}".format(name, newname))
+
+        elif command == "NOTICE":
+            name = nameof(sender)
+            target = args[0]
+            message = args[1]
+            print("[{} -> {}]! {}".format(name, target, message))
+
+        elif command == "PRIVMSG":
+            name = nameof(sender)
+            target = args[0]
+            message = args[1]
+            print("[{} -> {}] {}".format(name, target, message))
+
+        elif command.isdigit():
+            print(args[-1])
+
+        else:
+            print(original)
+
+
     def _recvmsg(self):
         msg = self._sockfile.readline().rstrip("\r\n")
-        print("< " + msg)
         words = msg.split()
 
         if words[0].startswith(":"):
@@ -91,11 +151,14 @@ class IRCClient(object):
                 break
             args.append(words.pop(0))
 
-        return (sender, cmd, args)
+        return (msg, sender, cmd, args)
+
 
     def _sendmsg(self, msg):
         self._sock.send((msg + "\r\n").encode("utf-8"))
-        print("> " + msg)
+
+def nameof(sender):
+    return sender.partition("!")[0]
 
 # Begin main
 
