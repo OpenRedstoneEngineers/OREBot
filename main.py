@@ -7,8 +7,8 @@ import socket
 
 class IRCClient(object):
     def __init__(
-            self, nickname, password, ident_password, server, channels, \
-            services, cmd):
+            self, nickname, password, ident_password, hostname, port, \
+            channels, services, cmd):
         self._sock = None
         self._sockfile = None
         self._connected = False
@@ -17,7 +17,8 @@ class IRCClient(object):
         self.nickname = nickname
         self.password = password
         self.ident_password = ident_password
-        self.server = server
+        self.hostname = hostname
+        self.port = port
         # Dictionary is used later for channel membership tracking
         self.channels = {}
         for chan in channels:
@@ -26,11 +27,11 @@ class IRCClient(object):
         self.cmd = cmd
 
     def connect(self):
-        print("Connecting to server at {}:{}".format(*self.server))
+        print("Connecting to server at {}:{}".format(self.hostname, self.port))
 
         self._sock = socket.socket()
         self._sock.setblocking(True)
-        self._sock.connect(self.server)
+        self._sock.connect((self.hostname, self.port))
         self._sockfile = self._sock.makefile(encoding="utf-8")
         self._connected = True
 
@@ -103,8 +104,5 @@ else:
     with open("./config.default.json", "r") as f:
         config = json.load(f)
 
-client = IRCClient(
-    config["nickname"], config["password"], config["ident_password"], \
-    (config["server"], config["port"]), config["channels"], \
-    config["services"], config["cmd"])
+client = IRCClient(**config)
 client.run()
