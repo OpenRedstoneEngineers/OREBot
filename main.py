@@ -26,7 +26,7 @@ class IRCClient:
         self.cmd = cmd
 
     def connect(self):
-        print("Connecting to server at %s:%s" % self.server)
+        print("Connecting to server at {}:{}".format(*self.server))
 
         self._sock = socket.socket()
         self._sock.setblocking(True)
@@ -35,12 +35,13 @@ class IRCClient:
         self._connected = True
 
         if self.password:
-            self._sendmsg("PASS :%s" % self.password)
-        self._sendmsg("NICK %s" % self.nickname)
-        self._sendmsg("USER %s 0 * :ORE Utility Bot" % getpass.getuser())
+            self._sendmsg("PASS :{}".format(self.password))
+        self._sendmsg("NICK {}".format(self.nickname))
+        self._sendmsg("USER {} 0 * :ORE Utility Bot".format(getpass.getuser()))
         if self.ident_password:
-            self._sendmsg("PRIVMSG NickServ :identify %s" % self.ident_password)
-        self._sendmsg("JOIN %s" % ",".join(self.channels.keys()))
+            self._sendmsg("PRIVMSG NickServ :identify {}".format(
+                self.ident_password))
+        self._sendmsg("JOIN {}".format(",".join(self.channels.keys())))
 
     def disconnect(self):
         print ("Disconnecting from server")
@@ -63,7 +64,7 @@ class IRCClient:
                 args = msg[2]
 
                 if command == "PING":
-                    self._sendmsg("PONG :%s" % args[0])
+                    self._sendmsg("PONG :{}".format(args[0]))
         finally:
             if self._connected:
                 self.disconnect()
