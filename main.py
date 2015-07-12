@@ -7,8 +7,10 @@ import socket
 
 class IRCClient(object):
     def __init__(
-            self, nickname, password, ident_password, hostname, port, \
-            channels, services, cmd):
+            self, nickname="OREBot", password=None, ident_password=None, \
+            hostname="irc.openredstone.org", port=6667, \
+            channels=["#openredstone"], \
+            services=["OREBuild", "ORESchool", "ORESurvival"], cmd="!"):
         self._sock = None
         self._sockfile = None
         self._connected = False
@@ -101,8 +103,7 @@ if os.path.isfile("./config.json"):
     with open("./config.json", "r") as f:
         config = json.load(f)
 else:
-    with open("./config.default.json", "r") as f:
-        config = json.load(f)
+    config = {}
 
 client = IRCClient(**config)
 client.run()

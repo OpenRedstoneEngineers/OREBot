@@ -1,16 +1,16 @@
 {
-  "nickname": "OREBot",
-  "password": null,
-  "ident_password": null,
-  "hostname": "irc.freenode.net",
-  "port": 6667,
-  "channels": [
+    "nickname": "OREBot",
+    "password": null,
+    "ident_password": null,
+    "hostname": "irc.openredstone.org",
+    "port": 6667,
+    "channels": [
     "#openredstone"
-  ],
-  "services": [
+    ],
+    "services": [
     "OREBuild",
     "ORESchool",
     "ORESurvival"
-  ],
-  "cmd": "!"
+    ],
+    "cmd": "!"
 }
