@@ -10,6 +10,7 @@ class IRCClient:
             self, nickname, password, ident_password, server, channels, \
             services, cmd):
         self._sock = None
+        self._sockfile = None
         self._connected = False
         self._msgbuffer = []
 
@@ -30,6 +31,7 @@ class IRCClient:
         self._sock = socket.socket()
         self._sock.setblocking(True)
         self._sock.connect(self.server)
+        self._sockfile = self._sock.makefile(encoding="utf-8")
         self._connected = True
 
         if self.password:
@@ -43,7 +45,9 @@ class IRCClient:
     def disconnect(self):
         print ("Disconnecting from server")
 
+        self._sockfile.close()
         self._sock.close()
+        self._sockfile = None
         self._sock = None
         self._connected = False
 
@@ -65,29 +69,25 @@ class IRCClient:
                 self.disconnect()
 
     def _recvmsg(self):
-        msgs = self._sock.recv(4096).decode("utf-8").splitlines()
+        msg = self._sockfile.readline().rstrip("\r\n")
+        print("< " + msg)
+        words = msg.split()
 
-        for msg in msgs:
-            print("< " + msg)
-            words = msg.split()
+        if words[0].startswith(":"):
+            sender = words.pop(0)[1:]
+        else:
+            sender = None
 
-            if words[0].startswith(":"):
-                sender = words.pop(0)[1:]
-            else:
-                sender = None
+        cmd = words.pop(0).upper()
 
-            cmd = words.pop(0).upper()
+        args = []
+        while words:
+            if (words[0].startswith(":")):
+                args.append(" ".join(words)[1:])
+                break
+            args.append(words.pop(0))
 
-            args = []
-            while words:
-                if (words[0].startswith(":")):
-                    args.append(" ".join(words)[1:])
-                    break
-                args.append(words.pop(0))
-
-            self._msgbuffer.append((sender, cmd, args))
-
-        return self._msgbuffer.pop(0)
+        return (sender, cmd, args)
 
     def _sendmsg(self, msg):
         self._sock.send((msg + "\r\n").encode("utf-8"))
