@@ -6,7 +6,6 @@ import os
 import socket
 
 import hooks
-import commands
 
 class IRCClient(object):
     def __init__(
