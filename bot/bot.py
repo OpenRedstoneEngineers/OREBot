@@ -64,7 +64,7 @@ class IRCClient(object):
         self._sendmsg("PRIVMSG {} :{}".format(target, msg))
 
     def kick(self, target, channel, msg):
-        print("[{} has kicked {} from {}]".format(
+        print("{} has kicked {} from {}".format(
             self.nickname, target, channel))
         self._sendmsg("KICK {} {} :{}".format(target, channel, msg))
 
