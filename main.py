@@ -5,6 +5,9 @@ import json
 import os
 import socket
 
+import hooks
+import commands
+
 class IRCClient(object):
     def __init__(
             self, nickname="OREBot", password=None, ident_password=None, \
@@ -61,6 +64,10 @@ class IRCClient(object):
             target = ",".join(target)
         self._sendmsg("PRIVMSG {} :{}".format(target, msg))
 
+    def kick(self, target, channel, msg):
+        print("[{} has kicked {} from {}]".format(
+            self.nickname, target, channel))
+        self._sendmsg("KICK {} {} :{}".format(target, channel, msg))
 
     def run(self):
         try:
@@ -125,6 +132,8 @@ class IRCClient(object):
             target = args[0]
             message = args[1]
             print("[{} -> {}] {}".format(name, target, message))
+
+            hooks.handle(self, name, target, message)
 
         elif command.isdigit():
             print(args[-1])

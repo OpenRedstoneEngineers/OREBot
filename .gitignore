@@ -1,2 +1,5 @@
-# Configuration file
+# Compiled modules
+*.pyc
+
+# Configuration files
 config.json
