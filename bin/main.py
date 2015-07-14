@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+import json
+import os
+
 from orebot import bot
 
 if os.path.isfile("./config.json"):

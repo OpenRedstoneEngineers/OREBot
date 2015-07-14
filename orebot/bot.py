@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
 import getpass
-import json
-import os
 import socket
 
-import orebot.hooks
+from orebot import hooks
+from orebot import commands
 
 class OREBot(object):
     def __init__(
