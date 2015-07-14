@@ -166,5 +166,63 @@ class OREBot(object):
     def _sendmsg(self, msg):
         self._sock.send((msg + "\r\n").encode("utf-8"))
 
+
+# Utility methods
+
 def nameof(sender):
+    """Parses a message prefix and returns the sender's name."""
     return sender.partition("!")[0]
+
+
+# Standard hooks
+
+@hooks.hook
+def mention(client, sender, target, message):
+    """Replies to a user who mentioned the bot's name."""
+    if client.nickname.lower() in message.lower():
+        client.privmsg(sender, "You called?")
+
+spammers = {}
+@hooks.hook
+def spam(client, sender, target, message):
+    """Detects spammers and removes them from the channel."""
+    if sender in client.services:
+        return
+    if sender not in spammers or message != spammers[sender][0]:
+        spammers[sender] = [message, 0]
+    else:
+        spammers[sender][1] += 1
+
+    if spammers[sender][1] == 1:
+        client.privmsg(sender, \
+                "WARNING: Spam detected. Stop or you will be kicked.")
+    if spammers[sender][1] >= 4:
+        for channel in client.channels:
+            client.kick(sender, channel, "spam")
+
+
+# Standard commands
+
+@commands.command
+def help(sender, sendmsg, label, args):
+    """Provides a list of available commands."""
+
+    if len(args) > 0:
+        page = int(args[0]) - 1
+    else:
+        page = 0
+
+    pages = len(commands) // 10 + 1
+    sortcommands = sorted(commands.values(), key=lambda c: c.__name__.lower())
+
+    sendmsg("-- Help (Page {} of {}) --".format(page + 1, pages))
+    for i in range(10):
+        if i >= len(commands):
+            break
+        command = sortcommands[i]
+        sendmsg("{}: {}".format(command.__name__, command.__doc__))
+
+@commands.command
+def ping(sender, sendmsg, label, args):
+    """Returns 'Pong!' to the sender."""
+    sendmsg("Pong!")
