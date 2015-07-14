@@ -8,5 +8,5 @@ if os.path.isfile("./config.json"):
 else:
     config = {}
 
-client = bot.IRCClient(**config)
+client = bot.OREBot(**config)
 client.run()

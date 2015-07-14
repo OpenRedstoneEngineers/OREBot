@@ -7,7 +7,7 @@ import socket
 
 import orebot.hooks
 
-class IRCClient(object):
+class OREBot(object):
     def __init__(
             self, nickname="OREBot", password=None, ident_password=None, \
             hostname="irc.openredstone.org", port=6667, \
