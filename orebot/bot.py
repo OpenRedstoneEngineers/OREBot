@@ -121,6 +121,12 @@ class OREBot(object):
             newname = args[0]
             print("{} is now known as {}".format(name, newname))
 
+        elif command == "MODE":
+            name = nameof(sender)
+            target = args[0]
+            mode = args[1]
+            print("{} has set the mode of {} to {}".format(name, target, mode))
+
         elif command == "NOTICE":
             name = nameof(sender)
             target = args[0]
