@@ -1,5 +1,12 @@
 # Compiled modules
+__pycache__
 *.pyc
+*.pyo
+
+# Distribution files
+/build
+/dist
+/MANIFEST
 
 # Configuration files
 config.json

@@ -5,7 +5,7 @@ import json
 import os
 import socket
 
-import hooks
+import orebot.hooks
 
 class IRCClient(object):
     def __init__(
@@ -63,10 +63,12 @@ class IRCClient(object):
             target = ",".join(target)
         self._sendmsg("PRIVMSG {} :{}".format(target, msg))
 
+
     def kick(self, target, channel, msg):
         print("{} has kicked {} from {}".format(
             self.nickname, target, channel))
         self._sendmsg("KICK {} {} :{}".format(target, channel, msg))
+
 
     def run(self):
         try:
@@ -167,14 +169,3 @@ class IRCClient(object):
 
 def nameof(sender):
     return sender.partition("!")[0]
-
-# Begin main
-
-if os.path.isfile("./config.json"):
-    with open("./config.json", "r") as f:
-        config = json.load(f)
-else:
-    config = {}
-
-client = IRCClient(**config)
-client.run()
