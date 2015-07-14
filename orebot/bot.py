@@ -77,6 +77,8 @@ class OREBot(object):
             while self._connected:
                 msg = self._recvmsg()
                 self.handle(msg)
+        except KeyboardInterrupt:
+            print("User triggered an interrupt")
         finally:
             if self._connected:
                 self.disconnect()
