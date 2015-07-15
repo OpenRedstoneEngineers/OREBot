@@ -240,3 +240,15 @@ def ping(sender, sendmsg, label, args):
     """Returns 'Pong!' to the sender."""
 
     sendmsg("Pong!")
+
+@commands.command
+def calc(sender, sendmsg, label, args):
+    """Evaluates a Python expression."""
+
+    sendmsg("Not yet implemented!")
+
+@commands.command
+def welcome(sender, sendmsg, label, args):
+    """Welcomes a new player to ORE."""
+
+    sendmsg("Not yet implemented!")
