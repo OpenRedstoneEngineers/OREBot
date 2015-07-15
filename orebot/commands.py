@@ -1,9 +1,11 @@
 from orebot import hooks
+from orebot import util
 
 commands = {}
 
 def command(fun):
     """A decorator for defining commands."""
+
     def wrap(client, user, sender, label, args):
         def sendmsg(message):
             if user in client.services:
@@ -22,19 +24,30 @@ def command(fun):
     return wrap
 
 @hooks.hook
-def oncommand(client, user, target, message):
+def oncommand(client, msg):
     """Handles command detection and parsing"""
+
+    if msg.command != "PRIVMSG":
+        return
+
+    target = msg.args[0]
+    message = msg.args[1]
+
     if not message.startswith(client.cmd):
         return
 
     words = message.split()
 
-    if user in client.services:
+    if msg.sender in client.services:
         sender = words.pop(0)[:-1]
     else:
-        sender = user
+        sender = msg.sender
+
+    msgsendername = msg.sendername
+    sendername = util.nameof(sender)
 
     label = words[0][len(client.cmd):]
     args = words[1:]
 
-    commands[label.lower()](client, user, sender, label, args)
+    if label.lower() in commands:
+        commands[label.lower()](client, msgsendername, sendername, label, args)

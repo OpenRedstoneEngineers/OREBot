@@ -3,8 +3,9 @@
 import getpass
 import socket
 
-from orebot import hooks
 from orebot import commands
+from orebot import hooks
+from orebot import util
 
 class OREBot(object):
     def __init__(
@@ -28,6 +29,8 @@ class OREBot(object):
 
 
     def connect(self):
+        """Connects to the server as defined in the bot's configuration."""
+
         print("Connecting to server at {}:{}".format(self.hostname, self.port))
 
         self._sock = socket.socket()
@@ -46,8 +49,17 @@ class OREBot(object):
         self._sendmsg("JOIN {}".format(",".join(self.channels)))
 
 
-    def disconnect(self):
+    def disconnect(self, reason=None):
+        """Disconnects from the bot's current server."""
+
         print ("Disconnecting from server")
+
+        if reason:
+            reason = " :" + reason
+        else:
+            reason = ""
+
+        self._sendmsg("QUIT" + reason)
 
         self._sockfile.close()
         self._sock.close()
@@ -57,6 +69,8 @@ class OREBot(object):
 
 
     def privmsg(self, target, msg):
+        """Sends a message to a user or channel on the current server."""
+
         print("[{} -> {}] {}".format(self.nickname, target, msg))
         if isinstance(target, list):
             target = ",".join(target)
@@ -64,12 +78,16 @@ class OREBot(object):
 
 
     def kick(self, target, channel, msg):
+        """Kicks a user from a channel, assuming the bot has permission to."""
+
         print("{} has kicked {} from {}".format(
             self.nickname, target, channel))
         self._sendmsg("KICK {} {} :{}".format(target, channel, msg))
 
 
     def run(self):
+        """Runs a loop that handles messages automatically until disconnect."""
+
         try:
             if not self._connected:
                 self.connect()
@@ -85,128 +103,114 @@ class OREBot(object):
 
 
     def handle(self, msg):
-        original = msg[0]
-        sender = msg[1]
-        command = msg[2]
-        args = msg[3]
+        """Logs a message and sends it to registered hooks."""
 
-        if command == "PING":
-            self._sendmsg("PONG :{}".format(args[0]))
+        if msg.command == "PING":
+            self._sendmsg("PONG :{}".format(msg.args[0]))
 
-        elif command == "JOIN":
-            name = nameof(sender)
-            channel = args[0]
+        elif msg.command == "JOIN":
+            name = msg.sendername
+            channel = msg.args[0]
             print("{} has joined {}".format(name, channel))
 
-        elif command == "PART":
-            name = self._nameof(sender)
-            channel = args[0]
+        elif msg.command == "PART":
+            name = msg.sendername
+            channel = msg.args[0]
             print("{} has left {}".format(name, channel))
 
-        elif command == "KICK":
-            name = nameof(sender)
-            victim = args[0]
-            channel = args[1]
+        elif msg.command == "KICK":
+            name = msg.sendername
+            victim = msg.args[0]
+            channel = msg.args[1]
             print("{} has kicked {} from {}".format(name, victim, channel))
 
-        elif command == "QUIT":
-            name = nameof(sender)
+        elif msg.command == "QUIT":
+            name = msg.sendername
             print("{} has quit IRC".format(name))
 
-        elif command == "KILL":
-            name = nameof(sender)
-            victim = args[0]
+        elif msg.command == "KILL":
+            name = msg.sendername
+            victim = msg.args[0]
             print("{} has killed {}".format(name, victim))
 
-        elif command == "NICK":
-            name = nameof(sender)
-            newname = args[0]
+        elif msg.command == "NICK":
+            name = msg.sendername
+            newname = msg.args[0]
             print("{} is now known as {}".format(name, newname))
 
-        elif command == "MODE":
-            name = nameof(sender)
-            target = args[0]
-            mode = args[1]
+        elif msg.command == "MODE":
+            name = msg.sendername
+            target = msg.args[0]
+            mode = msg.args[1]
             print("{} has set the mode of {} to {}".format(name, target, mode))
 
-        elif command == "NOTICE":
-            name = nameof(sender)
-            target = args[0]
-            message = args[1]
+        elif msg.command == "NOTICE":
+            name = msg.sendername
+            target = msg.args[0]
+            message = msg.args[1]
             print("[{} -> {}]! {}".format(name, target, message))
 
-        elif command == "PRIVMSG":
-            name = nameof(sender)
-            target = args[0]
-            message = args[1]
+        elif msg.command == "PRIVMSG":
+            name = msg.sendername
+            target = msg.args[0]
+            message = msg.args[1]
             print("[{} -> {}] {}".format(name, target, message))
 
-            hooks.handle(self, name, target, message)
-
-        elif command.isdigit():
-            print(args[-1])
+        elif msg.command.isdigit():
+            print(msg.args[-1])
 
         else:
-            print(original)
+            print(str(msg))
+
+        hooks.handle(self, msg)
 
 
     def _recvmsg(self):
         msg = self._sockfile.readline().rstrip("\r\n")
-        words = msg.split()
-
-        if words[0].startswith(":"):
-            sender = words.pop(0)[1:]
-        else:
-            sender = None
-
-        cmd = words.pop(0).upper()
-
-        args = []
-        while words:
-            if (words[0].startswith(":")):
-                args.append(" ".join(words)[1:])
-                break
-            args.append(words.pop(0))
-
-        return (msg, sender, cmd, args)
+        return util.Message(msg)
 
 
     def _sendmsg(self, msg):
         self._sock.send((msg + "\r\n").encode("utf-8"))
 
 
-# Utility methods
-
-def nameof(sender):
-    """Parses a message prefix and returns the sender's name."""
-    return sender.partition("!")[0]
-
-
 # Standard hooks
 
 @hooks.hook
-def mention(client, sender, target, message):
+def mention(client, msg):
     """Replies to a user who mentioned the bot's name."""
+
+    if msg.command != "PRIVMSG":
+        return
+
+    message = msg.args[1]
+
     if client.nickname.lower() in message.lower():
-        client.privmsg(sender, "You called?")
+        client.privmsg(msg.sendername, "You called?")
 
 spammers = {}
 @hooks.hook
-def spam(client, sender, target, message):
+def spam(client, msg):
     """Detects spammers and removes them from the channel."""
-    if sender in client.services:
-        return
-    if sender not in spammers or message != spammers[sender][0]:
-        spammers[sender] = [message, 0]
-    else:
-        spammers[sender][1] += 1
 
-    if spammers[sender][1] == 1:
-        client.privmsg(sender, \
+    sendername = msg.sendername
+
+    if msg.command != "PRIVMSG" or sendername in client.services:
+        return
+
+    message = msg.args[1]
+
+    if sendername not in spammers or message != spammers[sendername][0]:
+        spammers[sendername] = [message, 0]
+    else:
+        spammers[sendername][1] += 1
+
+    if spammers[sendername][1] == 1:
+        client.privmsg(msg.sendername, \
                 "WARNING: Spam detected. Stop or you will be kicked.")
-    if spammers[sender][1] >= 4:
+    if spammers[sendername][1] >= 4:
         for channel in client.channels:
-            client.kick(sender, channel, "spam")
+            client.kick(msg.sendername, channel, "Spam detected")
 
 
 # Standard commands
@@ -215,22 +219,26 @@ def spam(client, sender, target, message):
 def help(sender, sendmsg, label, args):
     """Provides a list of available commands."""
 
+    clist = commands.commands
+    csort = sorted(clist.values(), key=lambda c: c.__name__.lower())
+
     if len(args) > 0:
         page = int(args[0]) - 1
     else:
         page = 0
 
-    pages = len(commands) // 10 + 1
-    sortcommands = sorted(commands.values(), key=lambda c: c.__name__.lower())
+    pages = len(clist) // 10 + 1
 
     sendmsg("-- Help (Page {} of {}) --".format(page + 1, pages))
     for i in range(10):
-        if i >= len(commands):
+        if i >= len(csort):
             break
-        command = sortcommands[i]
+
+        command = csort[i + (page * 10)]
         sendmsg("{}: {}".format(command.__name__, command.__doc__))
 
 @commands.command
 def ping(sender, sendmsg, label, args):
     """Returns 'Pong!' to the sender."""
+
     sendmsg("Pong!")

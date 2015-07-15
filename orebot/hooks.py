@@ -5,7 +5,7 @@ def hook(fun):
     hooks.append(fun)
     return fun
 
-def handle(client, sender, target, message):
+def handle(client, msg):
     """Distributes the message among the decorated hooks."""
     for hook in hooks:
-        hook(client, sender, target, message)
+        hook(client, msg)
