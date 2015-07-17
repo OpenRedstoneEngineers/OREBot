@@ -38,7 +38,7 @@ def oncommand(bot, msg):
     if msg.sendername in bot.services:
         sender = words.pop(0)[:-1]
     else:
-        sender = util.nameof(msg.sender)
+        sender = msg.sendername
 
     if not words[0].startswith(bot.cmd):
         return
