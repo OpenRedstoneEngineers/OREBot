@@ -33,21 +33,20 @@ def oncommand(bot, msg):
     target = msg.args[0]
     message = msg.args[1]
 
-    if not message.startswith(bot.cmd):
-        return
-
     words = message.split()
 
-    if msg.sender in bot.services:
+    if msg.sendername in bot.services:
         sender = words.pop(0)[:-1]
     else:
-        sender = msg.sender
+        sender = util.nameof(msg.sender)
 
-    msgsendername = msg.sendername
-    sendername = util.nameof(sender)
+    if not words[0].startswith(bot.cmd):
+        return
 
-    label = words[0][len(bot.cmd):]
-    args = words[1:]
+    msgsender = msg.sendername
+
+    label = words.pop(0)[len(bot.cmd):]
+    args = words
 
     if label.lower() in commands:
-        commands[label.lower()](bot, msgsendername, sendername, label, args)
+        commands[label.lower()](bot, msgsender, sender, label, args)
