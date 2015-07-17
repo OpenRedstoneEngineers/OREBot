@@ -85,9 +85,9 @@ class OREBot(object):
     def kick(self, target, channel, msg):
         """Kicks a user from a channel, assuming the bot has permission to."""
 
-        if isinstance(target, list)
+        if isinstance(target, list):
             target = ",".join(target)
-        if isinstance(channel, list)
+        if isinstance(channel, list):
             channel = ",".join(channel)
 
         self._sendmsg("KICK {} {} :{}".format(channel, target, msg))
