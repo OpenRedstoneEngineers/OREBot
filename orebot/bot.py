@@ -85,7 +85,12 @@ class OREBot(object):
     def kick(self, target, channel, msg):
         """Kicks a user from a channel, assuming the bot has permission to."""
 
-        self._sendmsg("KICK {} {} :{}".format(target, channel, msg))
+        if isinstance(target, list)
+            target = ",".join(target)
+        if isinstance(channel, list)
+            channel = ",".join(channel)
+
+        self._sendmsg("KICK {} {} :{}".format(channel, target, msg))
         print("{} has kicked {} from {}".format(
             self.nickname, target, channel))
 
@@ -123,8 +128,8 @@ class OREBot(object):
 
         elif msg.command == "KICK":
             name = msg.sendername
-            victim = msg.args[0]
-            channel = msg.args[1]
+            channel = msg.args[0]
+            victim = msg.args[1]
             print("{} has kicked {} from {}".format(name, victim, channel))
 
         elif msg.command == "QUIT":
