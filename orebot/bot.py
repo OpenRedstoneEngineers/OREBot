@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import builtins
 import getpass
 import socket
 
@@ -249,7 +250,17 @@ def ping(bot, sender, sendmsg, label, args):
 def calc(bot, sender, sendmsg, label, args):
     """Evaluates a Python expression."""
 
-    sendmsg("Not yet implemented!")
+    expr = " ".join(args)
+    banned = dir() + dir(builtins)
+    for word in banned:
+        if word in expr:
+            sendmsg("Illegal word found: " + word)
+            return
+    try:
+        sendmsg(eval(expr))
+    except Exception as e:
+        sendmsg(str(e))
+
 
 @commands.command
 def welcome(bot, sender, sendmsg, label, args):
