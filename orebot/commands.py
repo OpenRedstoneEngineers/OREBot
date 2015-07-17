@@ -6,14 +6,14 @@ commands = {}
 def command(fun):
     """A decorator for defining commands."""
 
-    def wrap(client, user, sender, label, args):
+    def wrap(bot, user, sender, label, args):
         def sendmsg(message):
-            if user in client.services:
-                client.privmsg(user, ".msg {} {}".format(sender, message))
+            if user in bot.services:
+                bot.privmsg(user, ".msg {} {}".format(sender, message))
             else:
-                client.privmsg(user, message)
+                bot.privmsg(user, message)
         try:
-            fun(sender, sendmsg, label, args)
+            fun(bot, sender, sendmsg, label, args)
         except Exception as e:
             sendmsg("An error occurred while executing this command")
             raise e
@@ -24,7 +24,7 @@ def command(fun):
     return wrap
 
 @hooks.hook
-def oncommand(client, msg):
+def oncommand(bot, msg):
     """Handles command detection and parsing"""
 
     if msg.command != "PRIVMSG":
@@ -33,12 +33,12 @@ def oncommand(client, msg):
     target = msg.args[0]
     message = msg.args[1]
 
-    if not message.startswith(client.cmd):
+    if not message.startswith(bot.cmd):
         return
 
     words = message.split()
 
-    if msg.sender in client.services:
+    if msg.sender in bot.services:
         sender = words.pop(0)[:-1]
     else:
         sender = msg.sender
@@ -46,8 +46,8 @@ def oncommand(client, msg):
     msgsendername = msg.sendername
     sendername = util.nameof(sender)
 
-    label = words[0][len(client.cmd):]
+    label = words[0][len(bot.cmd):]
     args = words[1:]
 
     if label.lower() in commands:
-        commands[label.lower()](client, msgsendername, sendername, label, args)
+        commands[label.lower()](bot, msgsendername, sendername, label, args)

@@ -71,18 +71,22 @@ class OREBot(object):
     def privmsg(self, target, msg):
         """Sends a message to a user or channel on the current server."""
 
-        print("[{} -> {}] {}".format(self.nickname, target, msg))
         if isinstance(target, list):
             target = ",".join(target)
         self._sendmsg("PRIVMSG {} :{}".format(target, msg))
+        print("[{} -> {}] {}".format(self.nickname, target, msg))
+
+
+    def broadcast(self, msg):
+        self.privmsg(self.channels, msg)
 
 
     def kick(self, target, channel, msg):
         """Kicks a user from a channel, assuming the bot has permission to."""
 
+        self._sendmsg("KICK {} {} :{}".format(target, channel, msg))
         print("{} has kicked {} from {}".format(
             self.nickname, target, channel))
-        self._sendmsg("KICK {} {} :{}".format(target, channel, msg))
 
 
     def run(self):
@@ -175,7 +179,7 @@ class OREBot(object):
 # Standard hooks
 
 @hooks.hook
-def mention(client, msg):
+def mention(bot, msg):
     """Replies to a user who mentioned the bot's name."""
 
     if msg.command != "PRIVMSG":
@@ -183,17 +187,17 @@ def mention(client, msg):
 
     message = msg.args[1]
 
-    if client.nickname.lower() in message.lower():
-        client.privmsg(msg.sendername, "You called?")
+    if bot.nickname.lower() in message.lower():
+        bot.privmsg(msg.sendername, "You called?")
 
 spammers = {}
 @hooks.hook
-def spam(client, msg):
+def spam(bot, msg):
     """Detects spammers and removes them from the channel."""
 
     sendername = msg.sendername
 
-    if msg.command != "PRIVMSG" or sendername in client.services:
+    if msg.command != "PRIVMSG" or sendername in bot.services:
         return
 
     message = msg.args[1]
@@ -204,17 +208,17 @@ def spam(client, msg):
         spammers[sendername][1] += 1
 
     if spammers[sendername][1] == 1:
-        client.privmsg(msg.sendername, \
+        bot.privmsg(msg.sendername, \
                 "WARNING: Spam detected. Stop or you will be kicked.")
     if spammers[sendername][1] >= 4:
-        for channel in client.channels:
-            client.kick(msg.sendername, channel, "Spam detected")
+        for channel in bot.channels:
+            bot.kick(msg.sendername, channel, "Spam detected")
 
 
 # Standard commands
 
 @commands.command
-def help(sender, sendmsg, label, args):
+def help(bot, sender, sendmsg, label, args):
     """Provides a list of available commands."""
 
     clist = commands.commands
@@ -236,19 +240,20 @@ def help(sender, sendmsg, label, args):
         sendmsg("{}: {}".format(command.__name__, command.__doc__))
 
 @commands.command
-def ping(sender, sendmsg, label, args):
+def ping(bot, sender, sendmsg, label, args):
     """Returns 'Pong!' to the sender."""
 
     sendmsg("Pong!")
 
 @commands.command
-def calc(sender, sendmsg, label, args):
+def calc(bot, sender, sendmsg, label, args):
     """Evaluates a Python expression."""
 
     sendmsg("Not yet implemented!")
 
 @commands.command
-def welcome(sender, sendmsg, label, args):
+def welcome(bot, sender, sendmsg, label, args):
     """Welcomes a new player to ORE."""
 
-    sendmsg("Not yet implemented!")
+    bot.broadcast("Welcome to ORE! In order to get a plot, you must apply.")
+    bot.broadcast("See http://openredstone.org/apply for more details.")

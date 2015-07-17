@@ -11,5 +11,5 @@ if os.path.isfile("./config.json"):
 else:
     config = {}
 
-client = bot.OREBot(**config)
-client.run()
+bot = bot.OREBot(**config)
+bot.run()
