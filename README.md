@@ -12,6 +12,8 @@ The library package can be installed to your local machine using the `setup.py` 
 ## Configuring and Running the Main Script
 *Make sure you [install the libraries](#installation) before attempting to run the bot!*
 
+Aside from the IRC libraries, the official script is written with Raygun compatibility. If you wish to use that, you will have to install the Raygun library with `sudo pip3 install raygun4py` or if you don't have root access: `pip3 install --user raygun4py`
+
 The bot needs to be configured before first-time usage. Create a new file titled `config.json` in the bot's working directory, and put configuration parameters there. It must follow the same format as the `config.default.json` file provided with this repository; however, each parameter is optional and will default to the value in `config.default.json` if omitted.
 
 After you are finished with the configuration process, you can now run the bot! Simply enter `python3 bin/main.py` into a shell, and the bot will connect to the server defined in the configuration file.
