@@ -40,6 +40,9 @@ def oncommand(bot, msg):
     else:
         sender = msg.sendername
 
+    if len(words) < 1:
+        return
+
     if not words[0].startswith(bot.cmd):
         return
 
