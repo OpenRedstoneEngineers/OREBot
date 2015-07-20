@@ -12,5 +12,6 @@
     "ORESchool",
     "ORESurvival"
     ],
-    "cmd": "!"
+    "cmd": "!",
+    "raygun_key": null
 }
