@@ -205,7 +205,7 @@ def spam(bot, msg):
     sendername = msg.sendername
     
     i+=1
-    print i
+    print (i)
 
     if msg.command != "PRIVMSG" or sendername in bot.services:
         return
