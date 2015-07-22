@@ -197,15 +197,11 @@ def mention(bot, msg):
         bot.privmsg(msg.sendername, "You called?")
 
 spammers = {}
-i=0
 @hooks.hook
 def spam(bot, msg):
     """Detects spammers and removes them from the channel."""
 
     sendername = msg.sendername
-    
-    i+=1
-    print i
 
     if msg.command != "PRIVMSG" or sendername in bot.services:
         return
